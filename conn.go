@@ -17,12 +17,16 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type Connection struct {
 	ws      *websocket.Conn
 	send    chan []byte
-	session *Session
+	channel *Channel
+	chname  string
 }
 
 type Message struct {
@@ -82,13 +86,13 @@ func (c *Connection) writePump() {
 	}
 }
 
-func serveWs(w http.ResponseWriter, r *http.Request) {
+func serveWs(w http.ResponseWriter, r *http.Request, chname string) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	c := &Connection{send: make(chan []byte, 256), ws: ws}
+	c := &Connection{send: make(chan []byte, 256), ws: ws, chname: chname}
 	hub.register <- c
 	go c.writePump()
 	c.readPump()

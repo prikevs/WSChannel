@@ -1,8 +1,8 @@
 package main
 
-import (
-	"fmt"
-)
+//import (
+//"fmt"
+//)
 
 type Hub struct {
 	connections map[*Connection]bool
@@ -13,7 +13,7 @@ type Hub struct {
 
 func (h *Hub) Offline(conn *Connection) {
 	if _, ok := h.connections[conn]; ok {
-		if s := conn.session; s != nil {
+		if s := conn.channel; s != nil {
 			s.Del(conn)
 		}
 		delete(h.connections, conn)
@@ -25,40 +25,40 @@ func (h *Hub) Online(conn *Connection) {
 	h.connections[conn] = true
 }
 
-type Session struct {
+type Channel struct {
 	conns map[*Connection]bool
 }
 
-func (s *Session) Add(conn *Connection) {
+func (s *Channel) Add(conn *Connection) {
 	s.conns[conn] = true
-	conn.session = s
+	conn.channel = s
 }
 
-func (s *Session) Del(conn *Connection) {
+func (s *Channel) Del(conn *Connection) {
 	delete(s.conns, conn)
 }
 
-type SessionList struct {
-	sessions map[string]*Session
+type ChannelList struct {
+	channels map[string]*Channel
 }
 
-func (sl *SessionList) GetSession(key string) *Session {
-	if _, ok := sl.sessions[key]; !ok {
-		sl.sessions[key] = &Session{conns: make(map[*Connection]bool)}
+func (sl *ChannelList) GetChannel(key string) *Channel {
+	if _, ok := sl.channels[key]; !ok {
+		sl.channels[key] = &Channel{conns: make(map[*Connection]bool)}
 	}
-	return sl.sessions[key]
+	return sl.channels[key]
 }
 
-func (sl *SessionList) GC() {
-	for i := range sl.sessions {
-		if len(sl.sessions[i].conns) == 0 {
-			delete(sl.sessions, i)
+func (sl *ChannelList) GC() {
+	for i := range sl.channels {
+		if len(sl.channels[i].conns) == 0 {
+			delete(sl.channels, i)
 		}
 	}
 }
 
-var sessionlist = SessionList{
-	sessions: make(map[string]*Session),
+var channellist = ChannelList{
+	channels: make(map[string]*Channel),
 }
 
 var hub = Hub{
@@ -73,14 +73,14 @@ func (h *Hub) run() {
 		select {
 		case c := <-hub.register:
 			hub.Online(c)
-			session := sessionlist.GetSession("default")
-			session.Add(c)
+			channel := channellist.GetChannel(c.chname)
+			channel.Add(c)
 		case c := <-hub.unregister:
 			hub.Offline(c)
-			sessionlist.GC()
+			channellist.GC()
 		case m := <-hub.handle:
-			session := m.conn.session
-			for c := range session.conns {
+			channel := m.conn.channel
+			for c := range channel.conns {
 				if c == m.conn {
 					continue
 				}
@@ -88,10 +88,10 @@ func (h *Hub) run() {
 				case c.send <- m.msg:
 				default:
 					hub.Offline(c)
-					sessionlist.GC()
+					channellist.GC()
 				}
 			}
 		}
-		fmt.Println(sessionlist.GetSession("default"))
+		//fmt.Println(channellist.GetChannel("test"))
 	}
 }

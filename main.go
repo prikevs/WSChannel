@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"text/template"
 )
 
@@ -23,11 +25,26 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	homeTempl.Execute(w, r.Host)
 }
 
+var validPath = regexp.MustCompile("^/ws/([a-zA-Z0-9]+)$")
+
+func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.URL.Path)
+		m := validPath.FindStringSubmatch(r.URL.Path)
+		fmt.Println(r)
+		if m == nil {
+			http.NotFound(w, r)
+			return
+		}
+		serveWs(w, r, m[1])
+	}
+}
+
 func main() {
 	flag.Parse()
 	go hub.run()
 	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", serveWs)
+	http.HandleFunc("/ws/", makeHandler(serveWs))
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
