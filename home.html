@@ -4,25 +4,43 @@
 <title>Chat Example</title>
 <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 <script type="text/javascript">
+
     $(function() {
+        function waitForSocketConnection(socket, callback){
+    setTimeout(
+        function () {
+            if (socket.readyState === 1) {
+                console.log("Connection is made")
+                if(callback != null){
+                    callback();
+                }
+                return;
+
+            } else {
+                console.log("wait for connection...")
+                waitForSocketConnection(socket, callback);
+            }
+
+        }, 5); // wait 5 milisecond for the connection...
+      }
         var conn = new WebSocket("ws://{{$}}/ws/music");
         $("#prev").click(function() {
             if (conn.readyState!=1) {
                 conn = new WebSocket("ws://{{$}}/ws/music");
             } 
-            conn.send('{"op":"prev"}')
+            waitForSocketConnection(conn, function(){conn.send('{"op":"prev"}')})
         })
         $("#next").click(function() {
             if (conn.readyState!=1) {
                 conn = new WebSocket("ws://{{$}}/ws/music");
             } 
-            conn.send('{"op":"next"}')
+            waitForSocketConnection(conn, function(){conn.send('{"op":"next"}')})
         })
         $("#play").click(function() {
             if (conn.readyState!=1) {
                 conn = new WebSocket("ws://{{$}}/ws/music");
             } 
-            conn.send('{"op":"play"}')
+            waitForSocketConnection(conn, function(){conn.send('{"op":"play"}')})
         })
 
     });
