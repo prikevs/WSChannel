@@ -5,21 +5,21 @@
 <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 <script type="text/javascript">
     $(function() {
-        conn = new WebSocket("ws://{{$}}/ws/music");
+        var conn = new WebSocket("ws://{{$}}/ws/music");
         $("#prev").click(function() {
-            if (conn.readyState==3) {
+            if (conn.readyState!=1) {
                 conn = new WebSocket("ws://{{$}}/ws/test");
             } 
             conn.send('{"op":"prev"}')
         })
         $("#next").click(function() {
-            if (conn.readyState==3) {
+            if (conn.readyState!=1) {
                 conn = new WebSocket("ws://{{$}}/ws/test");
             } 
             conn.send('{"op":"next"}')
         })
         $("#play").click(function() {
-            if (conn.readyState==3) {
+            if (conn.readyState!=1) {
                 conn = new WebSocket("ws://{{$}}/ws/test");
             } 
             conn.send('{"op":"play"}')
