@@ -16,9 +16,9 @@ Clients in the same channel will receive messages of other clients in the same c
 ```
 $ go get github.com/gorilla/websocket
 $ go build -o wschannel main.go hub.go conn.go
-$ ./wschannel <address> <port>
+$ ./wschannel -addr=<address>:<port>
 
-//wschannel will listen on the port and waiting to connections.
+//wschannel will listen on the port(default 8080) and waiting for connections.
 ```
 
   
