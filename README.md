@@ -14,9 +14,9 @@ Clients in the same channel will receive messages of other clients in the same c
 ## Run
 * Clone this repo and set up GOPATH
 ```
-go get github.com/gorilla/websocket
-go build -o wschannel main.go hub.go conn.go
-./wschannel <address> <port>
+$ go get github.com/gorilla/websocket
+$ go build -o wschannel main.go hub.go conn.go
+$ ./wschannel <address> <port>
 
 //wschannel will listen on the port and waiting to connections.
 ```
