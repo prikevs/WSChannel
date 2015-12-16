@@ -8,19 +8,19 @@
         var conn = new WebSocket("ws://{{$}}/ws/music");
         $("#prev").click(function() {
             if (conn.readyState!=1) {
-                conn = new WebSocket("ws://{{$}}/ws/test");
+                conn = new WebSocket("ws://{{$}}/ws/music");
             } 
             conn.send('{"op":"prev"}')
         })
         $("#next").click(function() {
             if (conn.readyState!=1) {
-                conn = new WebSocket("ws://{{$}}/ws/test");
+                conn = new WebSocket("ws://{{$}}/ws/music");
             } 
             conn.send('{"op":"next"}')
         })
         $("#play").click(function() {
             if (conn.readyState!=1) {
-                conn = new WebSocket("ws://{{$}}/ws/test");
+                conn = new WebSocket("ws://{{$}}/ws/music");
             } 
             conn.send('{"op":"play"}')
         })
